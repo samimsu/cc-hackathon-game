@@ -1,7 +1,6 @@
 function preload() {
-    this.load.image('bug1', 'https://content.codecademy.com/courses/learn-phaser/Bug%20Invaders/bug_1.png');
-    this.load.image('bug2', 'https://content.codecademy.com/courses/learn-phaser/Bug%20Invaders/bug_2.png');
-    this.load.image('bug3', 'https://content.codecademy.com/courses/learn-phaser/Bug%20Invaders/bug_3.png');
+    this.load.image('2', '2.png');
+    this.load.image('4', '4.png');
     this.load.image('platform', 'https://content.codecademy.com/courses/learn-phaser/physics/platform.png');
     this.load.image('codey', 'https://content.codecademy.com/courses/learn-phaser/Bug%20Invaders/codey.png');
     this.load.image('bugPellet', 'https://content.codecademy.com/courses/learn-phaser/Bug%20Invaders/bugPellet.png');
@@ -20,7 +19,9 @@ function preload() {
     return totalEnemies;
   }
   
-  const gameState = {};
+  const gameState = {
+    enemyVelocity: 1
+  };
   
   function create() {
       // When gameState.active is true, the game is being played and not over. When gameState.active is false, then it's game over
@@ -39,13 +40,22 @@ function preload() {
   
       // Displays the initial number of bugs, this value is initially hardcoded as 24 
       gameState.scoreText = this.add.text(175, 482, 'Bugs Left: 24', { fontSize: '15px', fill: '#000000' });
-  //create bugs
+  //create monsters
+  //this array will be full of more assets
+  let enemiesarray = ['2', '4'];
+
   gameState.enemies = this.physics.add.group();
-  for (let yVal = 1; yVal <4; yVal++){
-    for (let xVal = 1; xVal <9; xVal++){
-      gameState.enemies.create(50 * xVal, 50 * yVal, 'bug1').setScale(.6).setGravityY(-200);
+  //hardcoded this for now, maybe someone else can make it better
+  for (let xVal = 1; xVal <9; xVal++){
+  for (let yVal = 1; yVal <=2; yVal++){
+      gameState.enemies.create(50 * xVal, 50 * yVal, '4').setScale(.6).setGravityY(-200);
     }
   }
+  for (let xVal = 1; xVal <9; xVal++){
+    for (let yVal = 3; yVal <=4; yVal++){
+        gameState.enemies.create(50 * xVal, 50 * yVal, '2').setScale(.6).setGravityY(-200);
+      }
+    }
   //create pellets (ew)
   const pellets = this.physics.add.group();
   
@@ -82,12 +92,13 @@ function preload() {
       this.physics.add.collider(gameState.enemies,gameState.bugRepellent,(bug,repellent) => {
         bug.destroy();
         repellent.destroy();
-        //gameState.scoreText = `Bugs Left: ${numOfTotalEnemies()}`
+        gameState.scoreText.setText(`Bugs Left: ${numOfTotalEnemies()}`);
           });
   }
   
   function update() {
       if (gameState.active) {
+        
           // If the game is active, then players can control Codey
           if (gameState.cursors.left.isDown) {
               gameState.player.setVelocityX(-160);
@@ -103,9 +114,19 @@ function preload() {
           }
   
           // Add logic for winning condition and enemy movements below:
-      
-    }
-  }
+         
+            gameState.enemies.getChildren().forEach(bug => bug.x = bug.x+gameState.enemyVelocity);
+           gameState.leftMostBug = sortedEnemies()[0];
+           gameState.rightMostBug = sortedEnemies()[sortedEnemies().length-1];
+            if (gameState.leftMostBug.x<10 || gameState.rightMostBug.x>440){
+              gameState.enemyVelocity = gameState.enemyVelocity * (-1);
+              gameState.enemies.getChildren().forEach(bug => bug.y = bug.y+10);
+            }
+          
+        }
+}
+          
+
   
   const config = {
       type: Phaser.AUTO,
