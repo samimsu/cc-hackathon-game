@@ -16,6 +16,7 @@ function preload() {
   this.load.image("14", "images/tiles/14.png");
   this.load.image("15", "images/tiles/15.png");
   this.load.image("blank", "blank.png");
+  this.load.audio('click','click.wav');
 }
 const gameState = {};
 
@@ -98,6 +99,7 @@ function handleRight(board) {
   } else {
     board[emptySquareIndex] = board[emptySquareIndex - 1];
     board[emptySquareIndex - 1] = "blank";
+    game.sound.play('click');
   }
 }
 
@@ -108,6 +110,7 @@ function handleLeft(board) {
   } else {
     board[emptySquareIndex] = board[emptySquareIndex + 1];
     board[emptySquareIndex + 1] = "blank";
+    game.sound.play('click');
   }
 }
 
@@ -118,6 +121,7 @@ function handleUp(board) {
   } else {
     board[emptySquareIndex] = board[emptySquareIndex + 4];
     board[emptySquareIndex + 4] = "blank";
+    game.sound.play('click');
   }
 }
 
@@ -128,6 +132,7 @@ function handleDown(board) {
   } else {
     board[emptySquareIndex] = board[emptySquareIndex - 4];
     board[emptySquareIndex - 4] = "blank";
+    game.sound.play('click');
   }
 }
 
