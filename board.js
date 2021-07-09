@@ -50,7 +50,7 @@ function displayBoard(board) {
       if (board[4 * j + i] === "blank") {
         gameState.tiles.create(xVal, yVal, board[4 * j + i]).setScale(0.6);
       } else {
-        gameState.tiles.create(xVal, yVal, board[4 * j + i]).setScale(0.1);
+        gameState.tiles.create(xVal, yVal, board[4 * j + i]);
       }
     }
   }
