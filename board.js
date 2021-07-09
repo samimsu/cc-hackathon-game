@@ -15,11 +15,11 @@ function preload() {
   this.load.image('13', '13.png');
   this.load.image('14', '14.png');
   this.load.image('15', '15.png');
+  this.load.image('blank','blank.png')
 
 }
 const gameState = {
-  konami: ['u','u','d','d','l','r','l','r','b','a'],
-  konamiEnter: ['']
+
 
 }
 
@@ -29,28 +29,33 @@ function create() {
 
   //make phaser listen for input
   gameState.cursors = this.input.keyboard.createCursorKeys();
-BKey = this.input.keyboard.addKey('b');
-AKey = this.input.keyboard.addKey('a');
+
 //create game environment
 gameState.tiles = this.add.group();
-
-  function displayBoard(board) {
-    for (let i = 0; i < 4; i ++) {
-      const xVal = (i+1)*50;
-      for (let j = 0; j < 4; j++){
-        const yVal = j*50;
-      gameState.tiles.create(xVal,yVal,board[4*j+i]);
-      }    
-    }
-  }
   let board = generateRandomBoard(startingBoard);
   displayBoard(board);
   gameState.board = board;
+  
+  var combo = this.input.keyboard.createCombo([ 38, 38, 40, 40, 37, 39, 37, 39, 66, 65 ], { resetOnMatch: true });
+  
+  this.input.keyboard.on('keycombomatch', function (event) {
+console.log('you win');
+      gameState.board = [...startingBoard];
+      displayBoard(startingBoard);
 
+  });
 
 }
-
-const startingBoard = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', " "];
+function displayBoard(board) {
+  for (let i = 0; i < 4; i ++) {
+    const xVal = (i+1)*50;
+    for (let j = 0; j < 4; j++){
+      const yVal = j*50+50;
+    gameState.tiles.create(xVal,yVal,board[4*j+i]);
+    }    
+  }
+}
+const startingBoard = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', "blank"];
 
 function generateRandomBoard(startingBoard) {
   let board = [...startingBoard];
@@ -72,43 +77,44 @@ function generateRandomBoard(startingBoard) {
 
 
 function handleRight(board) {
-  const emptySquareIndex = board.findIndex((item) => item === " ");
+  const emptySquareIndex = board.findIndex((item) => item === "blank");
   if (emptySquareIndex % 4 === 0) {
     return;
   } else {
     board[emptySquareIndex] = board[emptySquareIndex - 1];
-    board[emptySquareIndex - 1] = " ";
+    board[emptySquareIndex - 1] = "blank";
+    
   }
 }
 
 function handleLeft(board) {
   
-  const emptySquareIndex = board.findIndex((item) => item === " ");
+  const emptySquareIndex = board.findIndex((item) => item === "blank");
   if ((emptySquareIndex + 1) % 4 === 0) {
     return;
   } else {
     board[emptySquareIndex] = board[emptySquareIndex + 1];
-    board[emptySquareIndex + 1] = " ";
+    board[emptySquareIndex + 1] = "blank";
   }
 }
 
 function handleUp(board) {
-  const emptySquareIndex = board.findIndex((item) => item === " ");
+  const emptySquareIndex = board.findIndex((item) => item === "blank");
   if (emptySquareIndex > 11) {
     return;
   } else {
     board[emptySquareIndex] = board[emptySquareIndex + 4];
-    board[emptySquareIndex + 4] = " ";
+    board[emptySquareIndex + 4] = "blank";
   }
 }
 
 function handleDown(board) {
-  const emptySquareIndex = board.findIndex((item) => item === " ");
+  const emptySquareIndex = board.findIndex((item) => item === "blank");
   if (emptySquareIndex < 4) {
     return;
   } else {
     board[emptySquareIndex] = board[emptySquareIndex - 4];
-    board[emptySquareIndex - 4] = " ";
+    board[emptySquareIndex - 4] = "blank";
   }
 }
 
@@ -120,56 +126,38 @@ function isWin(board) {
 }
 
 function update() {
+  if (gameState.active === true){
 let board = gameState.board;
 
-  if (gameState.cursors.right.isDown) {
+  if (Phaser.Input.Keyboard.JustDown(gameState.cursors.right)) {
       console.log("sliding right");
       handleRight(board);
-      gameState.konamiEnter.push('r');
-    } else if (gameState.cursors.left.isDown) {
+      displayBoard(board);
+      
+    } else if (Phaser.Input.Keyboard.JustDown(gameState.cursors.left))  {
       console.log("sliding left");
       handleLeft(board);
-      gameState.konamiEnter.push('l');
-    } else if (gameState.cursors.up.isDown){
+      displayBoard(board);
+    } else if (Phaser.Input.Keyboard.JustDown(gameState.cursors.up)) {
       console.log("sliding up");
       handleUp(board);
-      gameState.konamiEnter.push('u');
-    } else if (gameState.cursors.down.isDown) {
+      displayBoard(board);
+    } else if (Phaser.Input.Keyboard.JustDown(gameState.cursors.down))  {
       console.log("sliding down");
       handleDown(board);
-      gameState.konamiEnter.push('d');
+      displayBoard(board);
     } 
-    else if (BKey.isDown) {
-      gameState.konamiEnter.push('b');
-    } 
-    else if (AKey.isDown) {
-      gameState.konamiEnter.push('a');
-    }
+
     else {
     }
-
-    if (gameState.konamiEnter.length === 10){
-      if (gameState.konamiEnter === konami){
-        board = [...startingBoard];
-        console.log("you win")
-      }
-      else {
-        gameState.konamiEnter= [];
-      }
+ 
+   if (isWin(board)) {
+     gameState.active=false;
+      console.log("you won");
+      
     }
-    else if (gameState.konamiEnter){
-for (i = 0; i<gameState.konamiEnter.length; i++){
-  if (gameState.konamiEnter[i] != gameState.konami[i]){
-    gameState.konamiEnter = [];
   }
 }
-    }
- 
-   // if (isWin(board)) {
-   //   console.log("you won");
-      
- //   }
-  }
 
 
 
