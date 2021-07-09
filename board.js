@@ -1,4 +1,56 @@
-const startingBoard = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, " "];
+function preload() {
+  //load the sprites in this format:
+  this.load.image('1', '1.png');
+  this.load.image('2', '2.png');
+  this.load.image('3', '3.png');
+  this.load.image('4', '4.png');
+  this.load.image('5', '5.png');
+  this.load.image('6', '6.png');
+  this.load.image('7', '7.png');
+  this.load.image('8', '8.png');
+  this.load.image('9', '9.png');
+  this.load.image('10', '10.png');
+  this.load.image('11', '11.png');
+  this.load.image('12', '12.png');
+  this.load.image('13', '13.png');
+  this.load.image('14', '14.png');
+  this.load.image('15', '15.png');
+
+}
+const gameState = {
+  konami: ['u','u','d','d','l','r','l','r','b','a'],
+  konamiEnter: ['']
+
+}
+
+function create() {
+  
+  gameState.active = true;
+
+  //make phaser listen for input
+  gameState.cursors = this.input.keyboard.createCursorKeys();
+BKey = this.input.keyboard.addKey('b');
+AKey = this.input.keyboard.addKey('a');
+//create game environment
+gameState.tiles = this.add.group();
+
+  function displayBoard(board) {
+    for (let i = 0; i < 4; i ++) {
+      const xVal = (i+1)*50;
+      for (let j = 0; j < 4; j++){
+        const yVal = j*50;
+      gameState.tiles.create(xVal,yVal,board[4*j+i]);
+      }    
+    }
+  }
+  let board = generateRandomBoard(startingBoard);
+  displayBoard(board);
+  gameState.board = board;
+
+
+}
+
+const startingBoard = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', " "];
 
 function generateRandomBoard(startingBoard) {
   let board = [...startingBoard];
@@ -17,15 +69,7 @@ function generateRandomBoard(startingBoard) {
   return board;
 }
 
-function displayBoard(board) {
-  for (let i = 0; i < 15; i += 4) {
-    const num1 = board[i] < 10 ? " " + board[i] : board[i];
-    const num2 = board[i + 1] < 10 ? " " + board[i + 1] : board[i + 1];
-    const num3 = board[i + 2] < 10 ? " " + board[i + 2] : board[i + 2];
-    const num4 = board[i + 3] < 10 ? " " + board[i + 3] : board[i + 3];
-    console.log(num1, num2, num3, num4);
-  }
-}
+
 
 function handleRight(board) {
   const emptySquareIndex = board.findIndex((item) => item === " ");
@@ -38,6 +82,7 @@ function handleRight(board) {
 }
 
 function handleLeft(board) {
+  
   const emptySquareIndex = board.findIndex((item) => item === " ");
   if ((emptySquareIndex + 1) % 4 === 0) {
     return;
@@ -74,42 +119,71 @@ function isWin(board) {
   return false;
 }
 
-function playGame() {
-  console.log("generating board...");
-  let board = generateRandomBoard(startingBoard);
-  displayBoard(board);
+function update() {
+let board = gameState.board;
 
-  const readline = require("readline");
-  readline.emitKeypressEvents(process.stdin);
-  process.stdin.setRawMode(true);
-  process.stdin.on("keypress", (str, key) => {
-    if (key.ctrl && key.name === "c") {
-      process.exit();
-    } else if (key.name === "right") {
+  if (gameState.cursors.right.isDown) {
       console.log("sliding right");
       handleRight(board);
-    } else if (key.name === "left") {
+      gameState.konamiEnter.push('r');
+    } else if (gameState.cursors.left.isDown) {
       console.log("sliding left");
       handleLeft(board);
-    } else if (key.name === "up") {
+      gameState.konamiEnter.push('l');
+    } else if (gameState.cursors.up.isDown){
       console.log("sliding up");
       handleUp(board);
-    } else if (key.name === "down") {
+      gameState.konamiEnter.push('u');
+    } else if (gameState.cursors.down.isDown) {
       console.log("sliding down");
       handleDown(board);
-    } else {
-      console.log(`You pressed the "${key.name}" key`);
-      console.log();
-      console.log(key);
-      console.log();
+      gameState.konamiEnter.push('d');
+    } 
+    else if (BKey.isDown) {
+      gameState.konamiEnter.push('b');
+    } 
+    else if (AKey.isDown) {
+      gameState.konamiEnter.push('a');
     }
-    displayBoard(board);
-    if (isWin(board)) {
-      console.log("you won");
-      process.exit();
+    else {
     }
-  });
-  console.log("Press any key...");
-}
 
-playGame();
+    if (gameState.konamiEnter.length === 10){
+      if (gameState.konamiEnter === konami){
+        board = [...startingBoard];
+        console.log("you win")
+      }
+      else {
+        gameState.konamiEnter= [];
+      }
+    }
+    else if (gameState.konamiEnter){
+for (i = 0; i<gameState.konamiEnter.length; i++){
+  if (gameState.konamiEnter[i] != gameState.konami[i]){
+    gameState.konamiEnter = [];
+  }
+}
+    }
+ 
+   // if (isWin(board)) {
+   //   console.log("you won");
+      
+ //   }
+  }
+
+
+
+const config = {
+  type: Phaser.AUTO,
+  width: 450,
+  height: 500,
+  backgroundColor: "b9eaff",
+  scene: {
+      preload,
+      create,
+      update
+  }
+};
+
+
+const game = new Phaser.Game(config);
