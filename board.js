@@ -175,8 +175,8 @@ function update() {
 
 const config = {
   type: Phaser.AUTO,
-  width: 450,
-  height: 500,
+  width: 250,
+  height: 250,
   backgroundColor: "b9eaff",
   scene: {
     preload,
