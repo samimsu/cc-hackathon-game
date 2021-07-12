@@ -1,20 +1,12 @@
-const config = {
-  type: Phaser.AUTO,
-  width: 250,
-  height: 250,
-  backgroundColor: "b9eaff",
-  scene: {
-    preload,
-    create,
-    update,
-  },
-};
+class GameScene extends Phaser.Scene {
 
-const game = new Phaser.Game(config);
+  constructor() {
+      super({
+          key: 'GameScene'
+      });
+    }
 
-
-
-function preload() {
+preload() {
   //load the sprites in this format:
   this.load.image("1", "images/tiles/1.png");
   this.load.image("2", "images/tiles/2.png");
@@ -34,9 +26,137 @@ function preload() {
   this.load.image("blank", "blank.png");
   this.load.audio('click','click.wav');
 }
-const gameState = {};
-let index = 0;
 
+create() {
+  gameState.active = true;
+  
+  //make phaser listen for input
+  gameState.cursors = this.input.keyboard.createCursorKeys();
+
+  //create game environment
+  gameState.tiles = this.add.group();
+  game.sound.mute = true;
+ let board = generateRandomBoard(startingBoard);
+
+  displayBoard(board);
+  gameState.tiles.getChildren().forEach(tile => tile.slot = board.indexOf(tile.texture.key));
+  game.sound.mute = false;
+  gameState.board = board;
+  gameState.tiles.getChildren().forEach(tile => console.log(tile, tile.slot));
+
+
+  var combo = this.input.keyboard.createCombo(
+    [38, 38, 40, 40, 37, 39, 37, 39, 66, 65],
+    { resetOnMatch: true }
+  );
+
+  this.input.keyboard.on("keycombomatch", function (event) {
+    console.log("you win");
+    gameState.board = [...startingBoard];
+    displayBoard(startingBoard);
+  });
+
+//tween functions which need to be inside create for some reason? *cries
+  gameState.tweenLeft = (empty,tile) => {
+  this.tweens.add({
+  targets: empty,
+  duration: 300,
+  x: '+=50',
+  ease: 'Linear',
+  callbackScope:empty
+});
+this.tweens.add( {
+  targets: tile,
+  duration: 300,
+  x: '-=50',
+  ease: 'Linear',
+  callbackScope: tile
+});
+  }
+
+gameState.tweenRight = (empty,tile) => {
+  this.tweens.add({
+    targets: empty,
+    duration: 300,
+    x: '-=50',
+    ease: 'Linear',
+  });
+  this.tweens.add( {
+    targets: tile,
+    duration: 300,
+    x: '+=50',
+    ease: 'Linear',
+    callbackScope: tile
+  });
+    }
+
+    gameState.tweenUp = (empty,tile) => {
+      this.tweens.add({
+        targets: empty,
+        duration: 300,
+        y: '+=50',
+        ease: 'Linear',
+      });
+      this.tweens.add( {
+        targets: tile,
+        duration: 300,
+        y: '-=50',
+        ease: 'Linear',
+        callbackScope: tile
+      });
+        }
+
+        gameState.tweenDown = (empty,tile) => {
+          this.tweens.add({
+            targets: empty,
+            duration: 300,
+            y: '-=50',
+            ease: 'Linear',
+          });
+          this.tweens.add( {
+            targets: tile,
+            duration: 300,
+            y: '+=50',
+            ease: 'Linear',
+            callbackScope: tile
+          });
+            }
+
+
+  }
+
+
+update() {
+  if (gameState.active === true) {
+    let board = gameState.board;
+
+    if (Phaser.Input.Keyboard.JustDown(gameState.cursors.right)) {
+      console.log("sliding right");
+      slideRight();
+      gameState.tiles.getChildren().forEach(tile => console.log(tile, tile.slot));
+    } else if (Phaser.Input.Keyboard.JustDown(gameState.cursors.left)) {
+      console.log("sliding left");
+      slideLeft();
+     
+    } else if (Phaser.Input.Keyboard.JustDown(gameState.cursors.up)) {
+      console.log("sliding up");
+      slideUp();
+    } else if (Phaser.Input.Keyboard.JustDown(gameState.cursors.down)) {
+      console.log("sliding down");
+      slideDown();
+    } else {
+    }
+
+    if (isWin(getTiles())) {
+      gameState.active = false;
+      console.log("you won");
+    }
+  }
+}
+}
+
+//some global variables
+const gameState = {};
 
 const slots = {
   0: {x:50,y:50},
@@ -76,63 +196,7 @@ const startingBoard = [
 ];
 
 
-
-function create() {
-  gameState.active = true;
-  
-  //make phaser listen for input
-  gameState.cursors = this.input.keyboard.createCursorKeys();
-
-  //create game environment
-  gameState.tiles = this.add.group();
-  game.sound.mute = true;
-  let board = generateRandomBoard(startingBoard);
-  displayBoard(board);
-  gameState.tiles.getChildren().forEach(tile => tile.slot = board.indexOf(tile.texture.key));
-  game.sound.mute = false;
-  gameState.board = board;
-
-
-  var combo = this.input.keyboard.createCombo(
-    [38, 38, 40, 40, 37, 39, 37, 39, 66, 65],
-    { resetOnMatch: true }
-  );
-
-  this.input.keyboard.on("keycombomatch", function (event) {
-    console.log("you win");
-    gameState.board = [...startingBoard];
-    displayBoard(startingBoard);
-  });
-
-
-}
-
-  const TweenHorz = function(empty,tile){
-      game.tweens.add({
-    targets: empty,
-    x:+50,
-    yoyo:false,
-    duration:2000,
-    ease:'Sine.easeInOut',
-    repeat:0, 
-    callbackScope: this
-  });
-  game.tweens.add({
-    targets: tile,
-    x:-50,
-    yoyo:false,
-    duration:2000,
-    ease:'Sine.easeInOut',
-    repeat:0, 
-    callbackScope: this
-  });
-
-  }
-
-  
-
-
-
+//helper function to display the first board
 
 function displayBoard(board) {
   for (let i = 0; i < 4; i++) {
@@ -146,13 +210,11 @@ function displayBoard(board) {
       }
     }
   }
-    
-  
 }
 
 
   
-    
+ //standalone helper functions to do stuff
     
 
 function getTiles() {
@@ -176,7 +238,7 @@ function generateRandomBoard(startingBoard) {
   return board;
 }
 
-
+//standalone helper functions to move tiles
 function handleRight(board) {
   const emptySquareIndex = board.findIndex((item) => item === "blank");
   if (emptySquareIndex % 4 === 0) {
@@ -195,10 +257,7 @@ function slideRight(){
     return;
   } else { 
   const tileToTheLeft = getTiles().find(tile => tile.slot === emptySquareSlot-1);
-  while (tileToTheLeft.x < slots[emptySquareSlot].x){
-    tileToTheLeft.x++;
-    emptySquare.x--;
-  }
+  gameState.tweenRight(emptySquare,tileToTheLeft);
   emptySquare.slot= emptySquareSlot-1;
   tileToTheLeft.slot = emptySquareSlot;
   game.sound.play('click');
@@ -225,16 +284,10 @@ function slideLeft(){
     return;
   } else {
   const tileToTheRight = getTiles().find(tile => tile.slot === emptySquareSlot+1);
-  while (tileToTheRight.x > slots[emptySquareSlot].x){
-    tileToTheRight.x--;
-    emptySquare.x++;
-  }
-  TweenHorz(emptySquare,tileToTheRight);
-
+  gameState.tweenLeft(emptySquare,tileToTheRight);
   emptySquare.slot= emptySquareSlot+1;
   tileToTheRight.slot = emptySquareSlot;
   game.sound.play('click');
-  console.log(emptySquare.slot);
   }
 }
 
@@ -249,6 +302,23 @@ function handleUp(board) {
   }
 }
 
+function slideUp(){
+  const emptySquare = getTiles().find(tile => tile.texture.key === "blank");
+  const emptySquareSlot = emptySquare.slot;
+  if (emptySquareSlot > 11) {
+    return;
+  } else {
+  const tileBelow = getTiles().find(tile => tile.slot === emptySquareSlot+4);
+  gameState.tweenUp(emptySquare,tileBelow);
+  emptySquare.slot= emptySquareSlot+4;
+  tileBelow.slot = emptySquareSlot;
+  game.sound.play('click');
+  
+  }
+  return emptySquare;
+}
+
+
 function handleDown(board) {
   const emptySquareIndex = board.findIndex((item) => item === "blank");
   if (emptySquareIndex < 4) {
@@ -260,42 +330,47 @@ function handleDown(board) {
   }
 }
 
+function slideDown(){
+  const emptySquare = getTiles().find(tile => tile.texture.key === "blank");
+  const emptySquareSlot = emptySquare.slot;
+  if (emptySquareSlot < 4) {
+    return;
+  } else {
+  const tileAbove = getTiles().find(tile => tile.slot === emptySquareSlot-4);
+  gameState.tweenDown(emptySquare, tileAbove);
+  emptySquare.slot= emptySquareSlot-4;
+  tileAbove.slot = emptySquareSlot;
+  game.sound.play('click');
+  
+  }
+  return emptySquare;
+}
+
+
 function isWin(board) {
+  
   if (JSON.stringify(board) === JSON.stringify(startingBoard)) {
     return true;
   }
   return false;
-}
-
-function update() {
-  if (gameState.active === true) {
-    let board = gameState.board;
-
-    if (Phaser.Input.Keyboard.JustDown(gameState.cursors.right)) {
-      console.log("sliding right");
-      //handleRight(board);
-      slideRight();
-      //displayBoard(board);
-    } else if (Phaser.Input.Keyboard.JustDown(gameState.cursors.left)) {
-      console.log("sliding left");
-      /*handleLeft(board);
-      displayBoard(board);*/
-      slideLeft();
-    } else if (Phaser.Input.Keyboard.JustDown(gameState.cursors.up)) {
-      console.log("sliding up");
-      handleUp(board);
-      displayBoard(board);
-    } else if (Phaser.Input.Keyboard.JustDown(gameState.cursors.down)) {
-      console.log("sliding down");
-      handleDown(board);
-      displayBoard(board);
-    } else {
-    }
-
-    if (isWin(board)) {
-      gameState.active = false;
-      console.log("you won");
+  /*
+  for (i = 0; i <board.length-1; i++){
+    if (board[i].slot === board[i].texture.key.toString()){
+    return true;
     }
   }
+  return false;
+*/
 }
 
+//don't change anything below here
+
+const config = {
+  type: Phaser.AUTO,
+  width: 250,
+  height: 250,
+  backgroundColor: "b9eaff",
+  scene: [GameScene]
+};
+
+const game = new Phaser.Game(config);
