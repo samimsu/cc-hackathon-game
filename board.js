@@ -38,65 +38,6 @@ const gameState = {};
 let index = 0;
 
 
-function create() {
-  gameState.active = true;
-  
-
-  //make phaser listen for input
-  gameState.cursors = this.input.keyboard.createCursorKeys();
-
-  //create game environment
-  gameState.tiles = this.add.group();
-  game.sound.mute = true;
-  let board = generateRandomBoard(startingBoard);
-  displayBoard(board);
-  gameState.tiles.getChildren().forEach(tile => tile.slot = board.indexOf(tile.texture.key));
-  game.sound.mute = false;
-  gameState.board = board;
-/*
-  const slideLeft = function(empty,tile){
-      this.tweens.add({
-    targets: empty,
-    x:+50,
-    yoyo:false,
-    duration:2000,
-    ease:'Sine.easeInOut',
-    repeat:0, 
-    callbackScope: this
-  });*/
-
-
-  var combo = this.input.keyboard.createCombo(
-    [38, 38, 40, 40, 37, 39, 37, 39, 66, 65],
-    { resetOnMatch: true }
-  );
-
-  this.input.keyboard.on("keycombomatch", function (event) {
-    console.log("you win");
-    gameState.board = [...startingBoard];
-    displayBoard(startingBoard);
-  });
-}
-
-
-
-
-function displayBoard(board) {
-  for (let i = 0; i < 4; i++) {
-    const xVal = (i + 1) * 50;
-    for (let j = 0; j < 4; j++) {
-      const yVal = j * 50 + 50;
-      if (board[4 * j + i] === "blank") {
-        gameState.tiles.create(xVal, yVal, board[4 * j + i]).setScale(0.6);
-      } else {
-        gameState.tiles.create(xVal, yVal, board[4 * j + i]);
-      }
-    }
-  }
-    
-  
-}
-
 const slots = {
   0: {x:50,y:50},
   1: {x:100,y:50},
@@ -135,6 +76,71 @@ const startingBoard = [
 ];
 
 
+
+function create() {
+  gameState.active = true;
+  
+  //make phaser listen for input
+  gameState.cursors = this.input.keyboard.createCursorKeys();
+
+  //create game environment
+  gameState.tiles = this.add.group();
+  game.sound.mute = true;
+  let board = generateRandomBoard(startingBoard);
+  displayBoard(board);
+  gameState.tiles.getChildren().forEach(tile => tile.slot = board.indexOf(tile.texture.key));
+  game.sound.mute = false;
+  gameState.board = board;
+
+
+  var combo = this.input.keyboard.createCombo(
+    [38, 38, 40, 40, 37, 39, 37, 39, 66, 65],
+    { resetOnMatch: true }
+  );
+
+  this.input.keyboard.on("keycombomatch", function (event) {
+    console.log("you win");
+    gameState.board = [...startingBoard];
+    displayBoard(startingBoard);
+  });
+
+
+}
+
+  const TweenHorz = function(empty,tile){
+      game.tweens.add({
+    targets: empty,
+    x:+50,
+    yoyo:false,
+    duration:2000,
+    ease:'Sine.easeInOut',
+    repeat:0, 
+    callbackScope: this
+  });
+  }
+
+  
+
+
+
+
+function displayBoard(board) {
+  for (let i = 0; i < 4; i++) {
+    const xVal = (i + 1) * 50;
+    for (let j = 0; j < 4; j++) {
+      const yVal = j * 50 + 50;
+      if (board[4 * j + i] === "blank") {
+        gameState.tiles.create(xVal, yVal, board[4 * j + i]).setScale(0.6);
+      } else {
+        gameState.tiles.create(xVal, yVal, board[4 * j + i]);
+      }
+    }
+  }
+    
+  
+}
+
+
   
     
     
@@ -159,6 +165,7 @@ function generateRandomBoard(startingBoard) {
   }
   return board;
 }
+
 
 function handleRight(board) {
   const emptySquareIndex = board.findIndex((item) => item === "blank");
@@ -212,6 +219,7 @@ function slideLeft(){
     tileToTheRight.x--;
     emptySquare.x++;
   }
+  TweenHorz(emptySquare,tileToTheRight);
 
   emptySquare.slot= emptySquareSlot+1;
   tileToTheRight.slot = emptySquareSlot;
@@ -280,5 +288,4 @@ function update() {
     }
   }
 }
-
 
