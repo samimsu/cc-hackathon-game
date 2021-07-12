@@ -117,6 +117,16 @@ function create() {
     repeat:0, 
     callbackScope: this
   });
+  game.tweens.add({
+    targets: tile,
+    x:-50,
+    yoyo:false,
+    duration:2000,
+    ease:'Sine.easeInOut',
+    repeat:0, 
+    callbackScope: this
+  });
+
   }
 
   
