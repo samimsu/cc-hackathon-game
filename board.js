@@ -1,3 +1,19 @@
+const config = {
+  type: Phaser.AUTO,
+  width: 250,
+  height: 250,
+  backgroundColor: "b9eaff",
+  scene: {
+    preload,
+    create,
+    update,
+  },
+};
+
+const game = new Phaser.Game(config);
+
+
+
 function preload() {
   //load the sprites in this format:
   this.load.image("1", "images/tiles/1.png");
@@ -19,18 +35,36 @@ function preload() {
   this.load.audio('click','click.wav');
 }
 const gameState = {};
+let index = 0;
+
 
 function create() {
   gameState.active = true;
+  
 
   //make phaser listen for input
   gameState.cursors = this.input.keyboard.createCursorKeys();
 
   //create game environment
   gameState.tiles = this.add.group();
+  game.sound.mute = true;
   let board = generateRandomBoard(startingBoard);
   displayBoard(board);
+  gameState.tiles.getChildren().forEach(tile => tile.slot = board.indexOf(tile.texture.key));
+  game.sound.mute = false;
   gameState.board = board;
+/*
+  const slideLeft = function(empty,tile){
+      this.tweens.add({
+    targets: empty,
+    x:+50,
+    yoyo:false,
+    duration:2000,
+    ease:'Sine.easeInOut',
+    repeat:0, 
+    callbackScope: this
+  });*/
+
 
   var combo = this.input.keyboard.createCombo(
     [38, 38, 40, 40, 37, 39, 37, 39, 66, 65],
@@ -43,6 +77,10 @@ function create() {
     displayBoard(startingBoard);
   });
 }
+
+
+
+
 function displayBoard(board) {
   for (let i = 0; i < 4; i++) {
     const xVal = (i + 1) * 50;
@@ -55,6 +93,27 @@ function displayBoard(board) {
       }
     }
   }
+    
+  
+}
+
+const slots = {
+  0: {x:50,y:50},
+  1: {x:100,y:50},
+  2: {x:150,y:50},
+  3: {x:200,y:50},
+  4: {x:50,y:100},
+  5: {x:100,y:100},
+  6: {x:150,y:100},
+  7: {x:200,y:100},
+  8: {x:50,y:150},
+  9: {x:100,y:150},
+  10: {x:150,y:150},
+  11: {x:200,y:150},
+  12: {x:50,y:200},
+  13: {x:50,y:200},
+  14: {x:50,y:200},
+  15: {x:200,y:200},
 }
 const startingBoard = [
   "1",
@@ -74,6 +133,15 @@ const startingBoard = [
   "15",
   "blank",
 ];
+
+
+  
+    
+    
+
+function getTiles() {
+  return gameState.tiles.getChildren();
+}
 
 function generateRandomBoard(startingBoard) {
   let board = [...startingBoard];
@@ -99,9 +167,28 @@ function handleRight(board) {
   } else {
     board[emptySquareIndex] = board[emptySquareIndex - 1];
     board[emptySquareIndex - 1] = "blank";
+   
     game.sound.play('click');
   }
 }
+function slideRight(){
+  const emptySquare = getTiles().find(tile => tile.texture.key === "blank");
+  const emptySquareSlot = emptySquare.slot;
+  if (emptySquareSlot % 4 === 0) {
+    return;
+  } else { 
+  const tileToTheLeft = getTiles().find(tile => tile.slot === emptySquareSlot-1);
+  while (tileToTheLeft.x < slots[emptySquareSlot].x){
+    tileToTheLeft.x++;
+    emptySquare.x--;
+  }
+  emptySquare.slot= emptySquareSlot-1;
+  tileToTheLeft.slot = emptySquareSlot;
+  game.sound.play('click');
+  console.log(emptySquare.slot);
+  }
+}
+
 
 function handleLeft(board) {
   const emptySquareIndex = board.findIndex((item) => item === "blank");
@@ -111,6 +198,25 @@ function handleLeft(board) {
     board[emptySquareIndex] = board[emptySquareIndex + 1];
     board[emptySquareIndex + 1] = "blank";
     game.sound.play('click');
+  }
+}
+
+function slideLeft(){
+  const emptySquare = getTiles().find(tile => tile.texture.key === "blank");
+  const emptySquareSlot = emptySquare.slot;
+  if ((emptySquareSlot + 1) % 4 === 0) {
+    return;
+  } else {
+  const tileToTheRight = getTiles().find(tile => tile.slot === emptySquareSlot+1);
+  while (tileToTheRight.x > slots[emptySquareSlot].x){
+    tileToTheRight.x--;
+    emptySquare.x++;
+  }
+
+  emptySquare.slot= emptySquareSlot+1;
+  tileToTheRight.slot = emptySquareSlot;
+  game.sound.play('click');
+  console.log(emptySquare.slot);
   }
 }
 
@@ -149,12 +255,14 @@ function update() {
 
     if (Phaser.Input.Keyboard.JustDown(gameState.cursors.right)) {
       console.log("sliding right");
-      handleRight(board);
-      displayBoard(board);
+      //handleRight(board);
+      slideRight();
+      //displayBoard(board);
     } else if (Phaser.Input.Keyboard.JustDown(gameState.cursors.left)) {
       console.log("sliding left");
-      handleLeft(board);
-      displayBoard(board);
+      /*handleLeft(board);
+      displayBoard(board);*/
+      slideLeft();
     } else if (Phaser.Input.Keyboard.JustDown(gameState.cursors.up)) {
       console.log("sliding up");
       handleUp(board);
@@ -173,16 +281,4 @@ function update() {
   }
 }
 
-const config = {
-  type: Phaser.AUTO,
-  width: 250,
-  height: 250,
-  backgroundColor: "b9eaff",
-  scene: {
-    preload,
-    create,
-    update,
-  },
-};
 
-const game = new Phaser.Game(config);
