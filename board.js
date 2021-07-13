@@ -119,6 +119,10 @@ class GameScene extends Phaser.Scene {
       if (isWin(getTiles())) {
         gameState.active = false;
         this.add.text(100, 100, "You Win");
+        this.input.on("pointerup", () => {
+          gameState.active = true;
+          this.scene.restart();
+        });
       }
     }
   }
