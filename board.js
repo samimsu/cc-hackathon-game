@@ -150,7 +150,7 @@ update() {
 
     if (isWin(getTiles())) {
       gameState.active = false;
-      console.log("you won");
+      this.add.text(100,100, 'You Win');
     }
   }
 }
