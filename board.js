@@ -37,6 +37,7 @@ create() {
   gameState.tiles = this.add.group();
   game.sound.mute = true;
  let board = generateRandomBoard(startingBoard);
+ 
 
   displayBoard(board);
   gameState.tiles.getChildren().forEach(tile => tile.slot = board.indexOf(tile.texture.key));
@@ -349,18 +350,24 @@ function slideDown(){
 
 function isWin(board) {
   
-  if (JSON.stringify(board) === JSON.stringify(startingBoard)) {
+ /* if (JSON.stringify(board) === JSON.stringify(startingBoard)) {
     return true;
   }
-  return false;
-  /*
-  for (i = 0; i <board.length-1; i++){
-    if (board[i].slot === board[i].texture.key.toString()){
-    return true;
+  return false;*/
+  let matches = 0;
+  
+  for (i=0; i<getTiles().length;i++){
+    if ((getTiles()[i].slot+1).toString() === getTiles()[i].texture.key){
+      matches++;
+    }
+    else if (getTiles()[i].texture.key === "blank" && getTiles()[i].slot === 15){
+      matches++;
     }
   }
+  if (matches === 16){
+    return true;
+  }
   return false;
-*/
 }
 
 //don't change anything below here
