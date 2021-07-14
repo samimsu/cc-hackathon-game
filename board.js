@@ -55,7 +55,7 @@ class GameScene extends Phaser.Scene {
     );
 
     this.input.keyboard.on("keycombomatch", function (event) {
-      console.log("you win");
+      
       gameState.board = [...startingBoard];
       displayBoard(startingBoard);
     });
@@ -101,9 +101,6 @@ class GameScene extends Phaser.Scene {
       if (Phaser.Input.Keyboard.JustDown(gameState.cursors.right)) {
         console.log("sliding right");
         slideRight();
-        // gameState.tiles
-        //   .getChildren()
-        //   .forEach((tile) => console.log(tile, tile.slot));
       } else if (Phaser.Input.Keyboard.JustDown(gameState.cursors.left)) {
         console.log("sliding left");
         slideLeft();
@@ -118,10 +115,13 @@ class GameScene extends Phaser.Scene {
 
       if (isWin(getTiles())) {
         gameState.active = false;
-        this.add.text(100, 100, "You Win");
+        this.add.text(85, 100, "You Win",{color:'#000000',backgroundColor:'#ffffff'});
+        this.add.text(35,120,`You needed ${gameState.moveCount} moves`,{color:'#000000',backgroundColor:'#ffffff'})
+        this.add.text(55,140,"Click to restart",{color:'#000000',backgroundColor:'#ffffff'})
         this.input.on("pointerup", () => {
           gameState.active = true;
           this.scene.restart();
+          Object.keys(gameState).forEach(key => gameState[key]=null);
         });
       }
     }
@@ -129,7 +129,9 @@ class GameScene extends Phaser.Scene {
 }
 
 //some global variables
-const gameState = {};
+const gameState = {
+  moveCount:0
+};
 
 const slots = {
   0: { x: 50, y: 50 },
@@ -233,6 +235,7 @@ function slideRight() {
     gameState.tweenRight(emptySquare, tileToTheLeft);
     emptySquare.slot = emptySquareSlot - 1;
     tileToTheLeft.slot = emptySquareSlot;
+    gameState.moveCount ++;
     game.sound.play("click");
     console.log(emptySquare.slot);
   }
@@ -263,6 +266,7 @@ function slideLeft() {
     gameState.tweenLeft(emptySquare, tileToTheRight);
     emptySquare.slot = emptySquareSlot + 1;
     tileToTheRight.slot = emptySquareSlot;
+    gameState.moveCount ++;
     game.sound.play("click");
   }
 }
@@ -293,6 +297,7 @@ function slideUp() {
     emptySquare.slot = emptySquareSlot + 4;
     tileBelow.slot = emptySquareSlot;
     game.sound.play("click");
+    gameState.moveCount ++;
   }
   return emptySquare;
 }
@@ -323,6 +328,7 @@ function slideDown() {
     emptySquare.slot = emptySquareSlot - 4;
     tileAbove.slot = emptySquareSlot;
     game.sound.play("click");
+    gameState.moveCount ++;
   }
   return emptySquare;
 }
