@@ -37,9 +37,15 @@ class LevelOneScene extends Phaser.Scene {
     //create game environment
     gameState.tiles = this.add.group();
     game.sound.mute = true;
+
+    const rows = 4;
+    const columns = 4;
+    const tileWidth = 50;
+    const tileHeight = 50;
+    setStartingBoard(rows, columns);
     let board = generateRandomBoard(startingBoard);
 
-    displayBoard(board);
+    displayBoard(board, rows, columns, tileWidth, tileHeight);
     gameState.tiles
       .getChildren()
       .forEach((tile) => (tile.slot = board.indexOf(tile.texture.key)));
@@ -53,7 +59,7 @@ class LevelOneScene extends Phaser.Scene {
 
     this.input.keyboard.on("keycombomatch", function (event) {
       gameState.board = [...startingBoard];
-      displayBoard(startingBoard);
+      displayBoard(startingBoard, rows, columns, tileWidth, tileHeight);
     });
 
     function getTweenObject(targets, x, y) {
